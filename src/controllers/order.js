@@ -14,6 +14,10 @@ module.exports = app => {
     Order.getByOrderId(req, res, next)
   })
 
+  app.get("/order/:orderId/status", async (req, res, next) => {
+    Order.getByOrderIdStatus(req, res, next)
+  })
+
   app.put("/order/:orderId", authenticate, async (req, res, next) => {
     Order.editByOrderId(req, res, next)
   })

@@ -14,11 +14,7 @@ const Order = new mongoose.Schema ({
     required: true
   },
   orderItems: {
-    type: String,
-    required: true
-  },
-  customization: {
-    type: String,
+    type: Array,
     required: true
   },
   status: {
@@ -26,6 +22,10 @@ const Order = new mongoose.Schema ({
     required: true
   },
   formOfPayment: {
+    type: String,
+    required: true
+  },
+  value: {
     type: String,
     required: true
   },

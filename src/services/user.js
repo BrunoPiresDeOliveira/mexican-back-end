@@ -43,7 +43,8 @@ class User {
       res.status(200).json(users.map(user => (
         {
           userId: user.userId,
-          name: user.name
+          name: user.name,
+          email: user.email
         }
       )))
     } catch (error) {
@@ -61,7 +62,7 @@ class User {
 
       if (!user) return res.status(404).send({error: "User not found."})
     
-      res.status(200).json({ userId: user.userId, name: user.name})
+      res.status(200).json({ userId: user.userId, name: user.name, email: user.email})
     } catch (error) {
       res.status(400)
       next(error)
@@ -71,18 +72,14 @@ class User {
   async editByUserId (req, res, next) {
     try {
       const { userId } = req.params
-      const { name, password } = req.body
-
-      const salt = await bcrypt.genSalt(10)
-      const hash = await bcrypt.hash(password, salt)
+      const { name, email } = req.body
 
       const user = await userModel.findOne({ userId })
-
       if (!user) return res.status(404).send({error: "User not found."})
 
       if (user.userId === userId) {
-        const response = await userModel.findOneAndUpdate(userId, { name, password: hash }, { new: true})
-        res.status(200).json({ userId: response.userId, name: response.name, password: "Password updated."})
+        const response = await userModel.findOneAndUpdate(userId, { name, email, password: user.password }, { new: true})
+        res.status(200).json({ userId: response.userId, name: response.name, email: response.email })
       } else {
         res.status(400).send({error: "Unable to update user."})
       }

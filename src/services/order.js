@@ -37,7 +37,7 @@ function validateDate(d){
 class Order {
   async create (req, res, next) {
     try {
-      const { deliveryDate, orderItems, customization, formOfPayment, clientId } = req.body
+      const { deliveryDate, orderItems, formOfPayment, clientId, value } = req.body
 
       if (!validateDate(deliveryDate)) throw({ _message: "A data de entrega não pode ser anterior ao dia atual."})
       
@@ -59,9 +59,9 @@ class Order {
         orderCreationDate,
         deliveryDate,
         orderItems,
-        customization,
         status,
         formOfPayment,
+        value,
         clientId,
         clientName: client.name
       })
@@ -71,17 +71,16 @@ class Order {
         orderCreationDate: order.orderCreationDate,
         deliveryDate: order.deliveryDate,
         orderItems: order.orderItems,
-        customization: order.customization,
         status: order.status,
         formOfPayment: order.formOfPayment,
+        value: order.value,
         clientId: order.clientId,
-        clientName: order.clientName
+        clientName: order.clientName,
       })
 
       res.status(200).send()
 
     } catch (error) {
-      console.log(error._message)
       if(error._message === 'Order validation failed') {
         error._message = "Há campos em branco"
       }
@@ -129,11 +128,28 @@ class Order {
         orderCreationDate: order.orderCreationDate,
         deliveryDate: order.deliveryDate,
         orderItems: order.orderItems,
-        customization: order.customization,
         status: order.status,
         formOfPayment: order.formOfPayment,
         clientId: order.clientId,
-        clientName: order.clientName
+        clientName: order.clientName,
+        value: order.value
+      })
+    } catch (error) {
+      res.status(400)
+      next(error)
+    }
+  }
+
+  async getByOrderIdStatus (req, res, next) {
+    try {
+      const { orderId } = req.params
+
+      const order = await orderModel.findOne({ orderId })
+
+      if (!order) return res.status(404).send({error: "Order not found."})
+    
+      res.status(200).json({ 
+        status: order.status,
       })
     } catch (error) {
       res.status(400)
