@@ -47,12 +47,7 @@ class Order {
       
       const orderId = uuidv4()
 
-      let data = new Date();
-      let data2 = new Date(data.valueOf() - data.getTimezoneOffset() * 60000);
-      let americanDate = data2.toISOString().replace(/\.\d{3}Z$/, '');
-      let americanDateSplited = americanDate.split('T')
-      let brazilDate = americanDateSplited[0].split('-').reverse().join('/')
-      let orderCreationDate = `${brazilDate}`
+      let orderCreationDate = `16/06/2021`
 
       const order = await orderModel.create({
         orderId,
