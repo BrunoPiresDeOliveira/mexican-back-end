@@ -6,7 +6,7 @@ class User {
   
   async create (req, res, next) {
     try {
-      const { name, password, email } = req.body
+      const { email, password, name, address } = req.body
       const userExists = await userModel.findOne({ email })
 
       if (userExists) return res.status(400).send({error: "User already exists."})
@@ -18,15 +18,18 @@ class User {
 
       const user = await userModel.create({
         userId,
-        name,
         email,
         password: hash,
-        role: "employee"
+        name,
+        address,
+        role: "owner"
       })
       res.status(201).json({
         userId: user.userId,
         name: user.name,
         email: user.email,
+        address: user.address,
+        role: "owner"
       })
     } catch (error) {
       res.status(400).json({error: error.message})
@@ -38,13 +41,13 @@ class User {
     try {
       const users = await userModel.find({})
 
-      if (!users.length) return res.status(404).send({error: "User not found."})
-    
       res.status(200).json(users.map(user => (
         {
           userId: user.userId,
+          email: user.email,
           name: user.name,
-          email: user.email
+          address: user.address,
+          role: "owner"
         }
       )))
     } catch (error) {
@@ -62,7 +65,15 @@ class User {
 
       if (!user) return res.status(404).send({error: "User not found."})
     
-      res.status(200).json({ userId: user.userId, name: user.name, email: user.email})
+      res.status(200).json(
+        {
+          userId: user.userId,
+          email: user.email,
+          name: user.name,
+          address: user.address,
+          role: "owner"
+        }
+      )
     } catch (error) {
       res.status(400)
       next(error)
@@ -72,14 +83,14 @@ class User {
   async editByUserId (req, res, next) {
     try {
       const { userId } = req.params
-      const { name, email } = req.body
+      const { email, name, address } = req.body
 
       const user = await userModel.findOne({ userId })
       if (!user) return res.status(404).send({error: "User not found."})
 
       if (user.userId === userId) {
-        const response = await userModel.findOneAndUpdate(userId, { name, email, password: user.password }, { new: true})
-        res.status(200).json({ userId: response.userId, name: response.name, email: response.email })
+        const userEdited = await userModel.findOneAndUpdate(userId, { email, name, password: user.password, address }, { new: true})
+        res.status(200).json({ userId: userEdited.userId, email: userEdited.email, name: userEdited.name, address: userEdited.address })
       } else {
         res.status(400).send({error: "Unable to update user."})
       }

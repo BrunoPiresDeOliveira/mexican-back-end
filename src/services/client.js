@@ -1,26 +1,38 @@
 const clientModel = require('../models/clientModel')
+const bcrypt = require('bcryptjs')
 const { v4: uuidv4 } = require('uuid')
 
 class Client {
   async create (req, res, next) {
     try {
-      const { name, email, cnpj, phone } = req.body
-      const clientExists = await clientModel.findOne({ cnpj })
+      const { email, password, name, cpf, phone, address } = req.body
+      const clientExists = await clientModel.findOne({ email })
 
       if (clientExists) return res.status(400).send({error: "Client already exists."})
       
       const clientId = uuidv4()
 
+      const salt = await bcrypt.genSalt(10)
+      const hash = await bcrypt.hash(password, salt)
+
       const client = await clientModel.create({
         clientId,
-        name,
         email,
-        cnpj,
+        password: hash,
+        name,
+        cpf,
         phone,
+        phone,
+        address,
+        role: "client"
       })
       res.status(201).send({
         clientId: client.clientId,
-        name: client.name
+        email: client.email,
+        name: client.name,
+        cpf: client.cpf,
+        phone: client.phone,
+        address: client.address,
       })
     } catch (error) {
       res.status(400)
@@ -36,12 +48,12 @@ class Client {
     
       res.status(200).json(clients.map(client => (
         {
-          _id: client._id,
           clientId: client.clientId,
-          name: client.name,
           email: client.email,
-          cnpj: client.cnpj,
+          name: client.name,
+          cpf: client.cpf,
           phone: client.phone,
+          address: client.address,
         }
       )))
     } catch (error) {
@@ -61,10 +73,11 @@ class Client {
     
       res.status(200).json({ 
         clientId: client.clientId, 
-        name: client.name,
         email: client.email,
-        cnpj: client.cnpj,
+        name: client.name,
+        cpf: client.cpf,
         phone: client.phone,
+        address: client.address,
       })
     } catch (error) {
       res.status(400)
@@ -75,20 +88,21 @@ class Client {
   async editByClientId (req, res, next) {
     try {
       const { clientId } = req.params
-      const newClient = req.body
+      const { email, name, cpf, phone, address } = req.body
 
       const client = await clientModel.findOne({ clientId })
-
       if (!client) return res.status(404).send({error: "Client not found."})
       
       if (client.clientId === clientId) {
-        const response = await clientModel.findByIdAndUpdate(client._id, newClient, {new: true})
+        const response = await clientModel.findOneAndUpdate(clientId, { email, password: client.password, name, cpf, phone, address }, {new: true})
         res.status(200).json({ 
           clientId: response.clientId, 
           name: response.name,
           email: response.email,
-          cnpj: response.cnpj,
+          name: response.name,
+          cpf: response.cpf,
           phone: response.phone,
+          address: response.address,
         })
       } else {
         res.status(400).send({error: "Unable to update client."})

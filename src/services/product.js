@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid')
 class Product {
   async create (req, res, next) {
     try {
-      const { name, price, quantity, size } = req.body
+      const { name, description, ingredients, price } = req.body
       const productExists = await productModel.findOne({ name })
 
       if (productExists) return res.status(400).send({error: "Product already exists."})
@@ -14,13 +14,16 @@ class Product {
       const product = await productModel.create({
         productId,
         name,
+        description,
+        ingredients,
         price,
-        quantity,
-        size
       })
       res.status(201).send({
         productId: product.productId,
-        name: product.name
+        name: product.name,
+        description: product.description,
+        ingredients: product.ingredients,
+        price: product.price,
       })
     } catch (error) {
       res.status(400)
@@ -32,15 +35,13 @@ class Product {
     try {
       const products = await productModel.find({})
 
-      if (!products.length) return res.status(404).send({error: "Product not found."})
-    
       res.status(200).json(products.map(product => (
         {
           productId: product.productId,
           name: product.name,
+          description: product.description,
+          ingredients: product.ingredients,
           price: product.price,
-          quantity: product.quantity,
-          size: product.size,
         }
       )))
     } catch (error) {
@@ -56,14 +57,12 @@ class Product {
 
       const product = await productModel.findOne({ productId })
 
-      if (!product) return res.status(404).send({error: "Product not found."})
-    
       res.status(200).json({ 
         productId: product.productId, 
         name: product.name,
+        description: product.description,
+        ingredients: product.ingredients,
         price: product.price,
-        quantity: product.quantity,
-        size: product.size,
       })
     } catch (error) {
       res.status(400)
@@ -74,20 +73,20 @@ class Product {
   async editByProductId (req, res, next) {
     try {
       const { productId } = req.params
-      const { name, price, quantity, size } = req.body
+      const { name, description, ingredients, price } = req.body
 
       const product = await productModel.findOne({ productId })
 
       if (!product) return res.status(404).send({error: "Product not found."})
 
       if (product.productId === productId) {
-        const response = await productModel.findOneAndUpdate(productId, { name, price, quantity, size }, { new: true})
+        const response = await productModel.findOneAndUpdate(productId, { name, description, ingredients, price }, { new: true})
         res.status(200).json({ 
           productId: response.productId, 
           name: response.name,
+          description: response.description,
+          ingredients: response.ingredients,
           price: response.price,
-          quantity: response.quantity,
-          size: response.size,
         })
       } else {
         res.status(400).send({error: "Unable to update product."})

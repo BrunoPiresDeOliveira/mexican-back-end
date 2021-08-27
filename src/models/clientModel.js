@@ -5,20 +5,28 @@ const Client = new mongoose.Schema ({
     type: String,
     required: true
   },
-  name: {
-    type: String,
-    required: true
-  },
   email: {
     type: String,
     required: true
   },
-  cnpj: {
+  password: {
+    type: String,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  cpf: {
     type: String,
     required: true
   },
   phone: {
-    type: Number,
+    type: String,
+    required: true
+  },
+  address: {
+    type: Object,
     required: true
   },
 })
