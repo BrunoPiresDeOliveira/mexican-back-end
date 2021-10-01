@@ -43,8 +43,6 @@ class Client {
   async list (req, res, next) {
     try {
       const clients = await clientModel.find({})
-
-      if (!clients.length) return res.status(404).send({error: "Client not found."})
     
       res.status(200).json(clients.map(client => (
         {
